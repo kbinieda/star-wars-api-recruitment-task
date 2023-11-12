@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { config } from './typeorm.config';
+import { CharacterController } from './character.controller';
+import { CharacterService } from './character.service';
+import { Character } from './character.entity';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    TypeOrmModule.forRoot(config),
+    TypeOrmModule.forFeature([Character]),
+  ],
+  controllers: [CharacterController],
+  providers: [CharacterService],
 })
 export class AppModule {}

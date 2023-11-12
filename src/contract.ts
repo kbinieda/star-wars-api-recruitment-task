@@ -1,3 +1,13 @@
+import {
+  IsIn,
+  IsNotEmpty,
+  IsString,
+  IsArray,
+  MaxLength,
+  IsOptional,
+} from 'class-validator';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+
 export type Page<Type, Label extends string> = Record<Label, Array<Type>> & {
   position: number; // page number
   size: number; // number of items per page
@@ -6,12 +16,29 @@ export type Page<Type, Label extends string> = Record<Label, Array<Type>> & {
 
 export type CharacterPage = Page<Character, 'characters'>;
 
-export type Episode = 'NEWHOPE' | 'EMPIRE' | 'JEDI';
-export interface Character {
-  id: number;
+const Episodes = ['NEWHOPE', 'EMPIRE', 'JEDI'] as const;
+export type Episode = (typeof Episodes)[number];
+
+export class CharacterInput {
+  @ApiProperty({ example: 'Darth Vader', maxLength: 30 })
+  @IsNotEmpty()
+  @MaxLength(30)
+  @IsString()
   name: string;
+
+  @ApiProperty({ example: ['NEWHOPE', 'EMPIRE'], enum: Episodes })
+  @IsArray()
+  @IsIn(Episodes, { each: true })
   episodes: Array<Episode>;
+
+  @ApiProperty({ example: 'Alderaan', required: false, maxLength: 30 })
+  @MaxLength(30)
+  @IsString()
+  @IsOptional()
   planet?: string;
 }
 
-export type CharacterInput = Omit<Character, 'id'>;
+class Id {
+  id: number;
+}
+export class Character extends IntersectionType(Id, CharacterInput) {}
